@@ -10,7 +10,7 @@
       text-align: center;
       padding: 20px;
     }
-    .grid, .pitches {
+    .grid, .pitches, .extras {
       display: grid;
       gap: 10px;
       margin: 20px auto;
@@ -19,7 +19,7 @@
       grid-template-columns: repeat(3, 1fr);
       max-width: 400px;
     }
-    .pitches {
+    .pitches, .extras {
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
       max-width: 600px;
     }
@@ -56,6 +56,14 @@
 
   <h2>Select Location</h2>
   <div class="grid" id="zones"></div>
+
+  <h2>Extras</h2>
+  <div class="extras">
+    <button onclick="callExtra('Back Pick')">Back Pick</button>
+    <button onclick="callExtra('Pick Off')">Pick Off</button>
+    <button onclick="callExtra('Catcher\'s Choice')">Catcher's Choice</button>
+    <button onclick="callExtra('Pitchout')">Pitchout</button>
+  </div>
 
   <button id="call-btn">Call Pitch</button>
 
@@ -115,6 +123,13 @@
       updateHistory();
       speakCall(call);
     };
+
+    function callExtra(message) {
+      history.unshift(message);
+      if (history.length > 10) history.pop();
+      updateHistory();
+      speakCall(message);
+    }
 
     function updateHistory() {
       historyList.innerHTML = "";
