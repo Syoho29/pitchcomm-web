@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PitchComm Web</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .grid, .pitches {
+      display: grid;
+      gap: 10px;
+      margin: 20px auto;
+    }
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 400px;
+    }
+    .pitches {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      max-width: 600px;
+    }
+    button {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button.selected {
+      background-color: #28a745;
+    }
+    #call-btn {
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 15px 30px;
+    }
+    #history {
+      margin-top: 30px;
+      max-height: 150px;
+      overflow-y: auto;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>PitchComm Web</h1>
+
+  <h2>Select Pitch</h2>
+  <div class="pitches" id="pitches"></div>
+
+  <h2>Select Location</h2>
+  <div class="grid" id="zones"></div>
+
+  <button id="call-btn">Call Pitch</button>
+
+  <div id="history">
+    <h3>Call History</h3>
+    <ul id="history-list"></ul>
+  </div>
+
+  <script>
+    const pitchTypes = ["1-Seam", "2-Seam", "4-Seam", "Cutter", "Changeup", "Slider", "Curveball", "Splitter", "Sinker"];
+    const zones = [
+      "High Outside", "High Middle", "High Inside",
+      "Middle Outside", "Center", "Middle Inside",
+      "Low Outside", "Low Middle", "Low Inside"
+    ];
+
+    let selectedPitch = "";
+    let selectedZone = "";
+    const history = [];
+
+    const pitchContainer = document.getElementById("pitches");
+    const zoneContainer = document.getElementById("zones");
+    const historyList = document.getElementById("history-list");
+
+    function createButtons(container, items, clickHandler) {
+      items.forEach(item => {
+        const btn = document.createElement("button");
+        btn.textContent = item;
+        btn.onclick = () => clickHandler(btn, item);
+        container.appendChild(btn);
+      });
+    }
+
+    function updateSelection(container, value, setValueFn) {
+      Array.from(container.children).forEach(btn => {
+        btn.classList.toggle("selected", btn.textContent === value);
+      });
+      setValueFn(value);
+    }
+
+    createButtons(pitchContainer, pitchTypes, (btn, pitch) => {
+      updateSelection(pitchContainer, pitch, v => selectedPitch = v);
+    });
+
+    createButtons(zoneContainer, zones, (btn, zone) => {
+      updateSelection(zoneContainer, zone, v => selectedZone = v);
+    });
+
+    document.getElementById("call-btn").onclick = () => {
+      if (!selectedPitch || !selectedZone) {
+        alert("Select both pitch and location.");
+        return;
+      }
+      const call = `${selectedPitch}, ${selectedZone}`;
+      history.unshift(call);
+      if (history.length > 10) history.pop();
+      updateHistory();
+      speakCall(call);
+    };
+
+    function updateHistory() {
+      historyList.innerHTML = "";
+      history.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = entry;
+        historyList.appendChild(li);
+      });
+    }
+
+    function speakCall(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.rate = 0.95;
+      speechSynthesis.speak(msg);
+    }
+  </script>
+</body>
+</html>
